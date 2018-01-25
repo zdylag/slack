@@ -67,13 +67,13 @@ func (p *proxy) translate(ev *slack.MessageEvent) gobot.Message {
 
 	switch ev.SubType {
 	case "channel_join":
-		m.Event = gobot.EnterEvent
+		m.Type = gobot.Enter
 	case "channel_leave":
-		m.Event = gobot.LeaveEvent
+		m.Type = gobot.Leave
 	case "channel_topic":
-		m.Event = gobot.TopicEvent
+		m.Type = gobot.Topic
 	default:
-		m.Event = gobot.MessageEvent
+		m.Type = gobot.DefaultMessage
 	}
 
 	return m

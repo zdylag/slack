@@ -28,7 +28,7 @@ func TestProxy(t *testing.T) {
 				Text:    text,
 			}}),
 			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.MessageEvent, result.Event)
+				assert.Equal(gobot.DefaultMessage, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -40,7 +40,7 @@ func TestProxy(t *testing.T) {
 				Text:    text,
 			}}),
 			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.EnterEvent, result.Event)
+				assert.Equal(gobot.Enter, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -52,7 +52,7 @@ func TestProxy(t *testing.T) {
 				Text:    text,
 			}}),
 			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.LeaveEvent, result.Event)
+				assert.Equal(gobot.Leave, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -65,7 +65,7 @@ func TestProxy(t *testing.T) {
 				Text:    text,
 			}}),
 			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.TopicEvent, result.Event)
+				assert.Equal(gobot.Topic, result.Type)
 				assert.Equal(expected.Topic, result.Topic)
 			},
 		},

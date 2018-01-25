@@ -52,24 +52,24 @@ func (a *Adapter) Username() string { return a.Name }
 func (a *Adapter) Messages() <-chan gobot.Message { return a.proxy.Connect() }
 
 func emptyMessage(m gobot.Message) bool {
-	return m.Text == "" && m.Extra == nil
+	return m.Text == "" && m.Params == nil
 }
 
 // Send send messages to Slack. If only text is provided, it uses
 // the already open RTM connection. If slack.PostMessageParamters
-// are provided in the message.Extra field, it will send a web
+// are provided in the message.Params field, it will send a web
 // API request.
 func (a *Adapter) Send(m gobot.Message) error {
 	if emptyMessage(m) {
 		return nil
 	}
 
-	if m.Extra == nil {
+	if m.Params == nil {
 		a.proxy.RTM.SendMessage(a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room))
 		return nil
 	}
 
-	if pm, ok := m.Extra.(slack.PostMessageParameters); ok {
+	if pm, ok := m.Params.(slack.PostMessageParameters); ok {
 		pm.AsUser = true
 		if pm.User == "" {
 			pm.User = a.ID

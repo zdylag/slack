@@ -13,29 +13,25 @@ func Example_basic() {
 	robot := gobot.New(
 		slack.New(os.Getenv("SLACK_TOKEN")),
 	)
-	robot.Hear(&gobot.Hook{
-		Match: gobot.MatchRegexp("hi"),
-		Func: func(r gobot.Responder) error {
-			r.Send(gobot.Message{Text: "hi to you too, " + r.User})
-			return nil
-		},
+	robot.Hear(gobot.Regexp("hi"), func(r gobot.Responder) error {
+		r.Send(gobot.Message{Text: "hi to you too, " + r.User})
+		return nil
 	})
-	robot.Run(":9090")
+	robot.Run()
 }
 
 func Example_advanced() {
 	robot := gobot.New(
 		slack.New(os.Getenv("SLACK_TOKEN")),
 	)
-	robot.Enter(&gobot.Hook{
-		Func: func(r gobot.Responder) error {
-			msg := r.Message.Envelope.(*slacker.Message)
+	robot.Enter(func(r gobot.Responder) error {
+		msg := r.Message.Envelope.(*slacker.Message)
 
-			r.Send(gobot.Message{Text: "Any friend of " + msg.Inviter + " is a friend of mine"})
-			return nil
-		},
-	})
-	robot.Run(":9090")
+		r.Send(gobot.Message{Text: "Any friend of " + msg.Inviter + " is a friend of mine"})
+		return nil
+	},
+	)
+	robot.Run()
 }
 
 func ExampleSend() {
@@ -45,7 +41,7 @@ func ExampleSend() {
 
 func ExampleSend_custom() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
-	adapter.Send(gobot.Message{Extra: slacker.PostMessageParameters{
+	adapter.Send(gobot.Message{Params: slacker.PostMessageParameters{
 		Username: "ci",
 		Text:     "Failed!",
 		Attachments: []slacker.Attachment{
