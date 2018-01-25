@@ -32,6 +32,12 @@ func (p *proxy) Connect() chan gobot.Message {
 	return ch
 }
 
+func (p *proxy) Disconnect() {
+	if p.RTM != nil {
+		p.RTM.Disconnect()
+	}
+}
+
 func (p *proxy) Forward(in <-chan slack.RTMEvent, out chan<- gobot.Message) {
 	defer close(out)
 	for msg := range in {

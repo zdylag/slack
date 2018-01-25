@@ -45,6 +45,9 @@ func New(secret string) *Adapter {
 // Load provides the slack adapter access to the Robot's logger
 func (a *Adapter) Load(r *gobot.Robot) { a.Robot = r }
 
+// Unload disconnects from slack's RTM socket
+func (a *Adapter) Unload(r *gobot.Robot) { a.proxy.Disconnect() }
+
 // Username returns the bot's username
 func (a *Adapter) Username() string { return a.Name }
 
