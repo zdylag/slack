@@ -62,7 +62,7 @@ func (f formatter) formatLinks(in string) string {
 		default:
 			link = strings.Replace(link, "mailto:", "", 1)
 			if label != "" && strings.Contains(link, label) {
-				return label + "(" + link + ")"
+				return label
 			}
 			return link
 		}
