@@ -67,6 +67,14 @@ func (a *Adapter) Send(m gobot.Message) error {
 		return nil
 	}
 
+	if m.Room == "" {
+		if msg, ok := m.Envelope.(slack.Message); ok {
+			m.Room = msg.Channel
+		} else {
+			return errors.New("No Envelope provided")
+		}
+	}
+
 	if m.Params == nil {
 		a.proxy.RTM.SendMessage(a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room))
 		return nil
@@ -92,7 +100,7 @@ func (a *Adapter) Reply(m gobot.Message) error {
 	}
 
 	msg, ok := m.Envelope.(slack.Message)
-	if !ok || len(msg.Channel) == 0 {
+	if !ok || msg.Channel == "" {
 		return errors.New("No Envelope provided")
 	}
 
