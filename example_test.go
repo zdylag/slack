@@ -4,30 +4,30 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/berfarah/gobot"
-	"github.com/berfarah/gobot-slack"
+	"github.com/botopolis/bot"
+	"github.com/botopolis/slack"
 	slacker "github.com/nlopes/slack"
 )
 
 func Example_basic() {
-	robot := gobot.New(
+	robot := bot.New(
 		slack.New(os.Getenv("SLACK_TOKEN")),
 	)
-	robot.Hear(gobot.Regexp("hi"), func(r gobot.Responder) error {
-		r.Send(gobot.Message{Text: "hi to you too, " + r.User})
+	robot.Hear(bot.Regexp("hi"), func(r bot.Responder) error {
+		r.Send(bot.Message{Text: "hi to you too, " + r.User})
 		return nil
 	})
 	robot.Run()
 }
 
 func Example_advanced() {
-	robot := gobot.New(
+	robot := bot.New(
 		slack.New(os.Getenv("SLACK_TOKEN")),
 	)
-	robot.Enter(func(r gobot.Responder) error {
+	robot.Enter(func(r bot.Responder) error {
 		msg := r.Message.Envelope.(*slacker.Message)
 
-		r.Send(gobot.Message{Text: "Any friend of " + msg.Inviter + " is a friend of mine"})
+		r.Send(bot.Message{Text: "Any friend of " + msg.Inviter + " is a friend of mine"})
 		return nil
 	},
 	)
@@ -36,12 +36,12 @@ func Example_advanced() {
 
 func ExampleSend() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
-	adapter.Send(gobot.Message{Text: "hello!"})
+	adapter.Send(bot.Message{Text: "hello!"})
 }
 
 func ExampleSend_custom() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
-	adapter.Send(gobot.Message{Params: slacker.PostMessageParameters{
+	adapter.Send(bot.Message{Params: slacker.PostMessageParameters{
 		Username: "ci",
 		Text:     "Failed!",
 		Attachments: []slacker.Attachment{
@@ -60,12 +60,12 @@ func ExampleSend_custom() {
 
 func ExampleReply() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
-	fromMessage := gobot.Message{
+	fromMessage := bot.Message{
 		Text: "Hi bot! How are you?",
 		User: "ali",
 		Room: "general",
 	}
-	adapter.Reply(gobot.Message{
+	adapter.Reply(bot.Message{
 		Text:     "I'm well, thanks!",
 		Envelope: fromMessage,
 	})
@@ -73,7 +73,7 @@ func ExampleReply() {
 
 func ExampleTopic() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
-	adapter.Topic(gobot.Message{
+	adapter.Topic(bot.Message{
 		Room:  "general",
 		Topic: "General conversation",
 	})

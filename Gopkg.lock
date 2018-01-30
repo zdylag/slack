@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  name = "github.com/berfarah/gobot"
+  name = "github.com/botopolis/bot"
   packages = ["."]
-  revision = "b8f8a6f0f76dbdd62b2ccdcee8ab7466a83d5733"
-  version = "v0.1.0"
+  revision = "efb358abb4e58452f303dacdab04768982c1dc7b"
+  version = "v0.2.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -57,6 +57,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ffb88f5fb9d9e20fd3f23398e050181aa4229733e26f6d9f280e6bb1fef1696b"
+  inputs-digest = "2238d723542c0e9cfb36a983d8aed3b0deab46d726cb05fafc5b23345d13a50b"
   solver-name = "gps-cdcl"
   solver-version = 1

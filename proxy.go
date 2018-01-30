@@ -1,7 +1,7 @@
 package slack
 
 import (
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
 )
 
@@ -25,9 +25,9 @@ func newProxy(a *Adapter) *proxy {
 
 func (p *proxy) OnConnect(f func(ev *slack.ConnectedEvent)) { p.onConnect = f }
 
-func (p *proxy) Connect() chan gobot.Message {
+func (p *proxy) Connect() chan bot.Message {
 	go p.RTM.ManageConnection()
-	ch := make(chan gobot.Message, 32)
+	ch := make(chan bot.Message, 32)
 	go p.Forward(p.RTM.IncomingEvents, ch)
 	return ch
 }
@@ -38,7 +38,7 @@ func (p *proxy) Disconnect() {
 	}
 }
 
-func (p *proxy) Forward(in <-chan slack.RTMEvent, out chan<- gobot.Message) {
+func (p *proxy) Forward(in <-chan slack.RTMEvent, out chan<- bot.Message) {
 	defer close(out)
 	for msg := range in {
 		switch ev := msg.Data.(type) {
@@ -59,11 +59,11 @@ func (p *proxy) Forward(in <-chan slack.RTMEvent, out chan<- gobot.Message) {
 	}
 }
 
-func (p *proxy) translate(ev *slack.MessageEvent) gobot.Message {
+func (p *proxy) translate(ev *slack.MessageEvent) bot.Message {
 	user, _ := p.Store.UserByID(ev.User)
 	channel, _ := p.Store.ChannelByID(ev.Channel)
 
-	m := gobot.Message{
+	m := bot.Message{
 		User:     user.Name,
 		Room:     channel.Name,
 		Text:     p.formatter.Format(ev),
@@ -73,13 +73,13 @@ func (p *proxy) translate(ev *slack.MessageEvent) gobot.Message {
 
 	switch ev.SubType {
 	case "channel_join":
-		m.Type = gobot.Enter
+		m.Type = bot.Enter
 	case "channel_leave":
-		m.Type = gobot.Leave
+		m.Type = bot.Leave
 	case "channel_topic":
-		m.Type = gobot.Topic
+		m.Type = bot.Topic
 	default:
-		m.Type = gobot.DefaultMessage
+		m.Type = bot.DefaultMessage
 	}
 
 	return m

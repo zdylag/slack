@@ -3,7 +3,7 @@ package slack
 import (
 	"testing"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func TestProxy(t *testing.T) {
 
 	proxyTestCases := []struct {
 		In     slack.MessageEvent
-		Assert func(gobot.Message, gobot.Message)
+		Assert func(bot.Message, bot.Message)
 	}{
 		{
 			In: slack.MessageEvent(slack.Message{Msg: slack.Msg{
@@ -27,8 +27,8 @@ func TestProxy(t *testing.T) {
 				Channel: room,
 				Text:    text,
 			}}),
-			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.DefaultMessage, result.Type)
+			Assert: func(expected bot.Message, result bot.Message) {
+				assert.Equal(bot.DefaultMessage, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -39,8 +39,8 @@ func TestProxy(t *testing.T) {
 				Channel: room,
 				Text:    text,
 			}}),
-			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.Enter, result.Type)
+			Assert: func(expected bot.Message, result bot.Message) {
+				assert.Equal(bot.Enter, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -51,8 +51,8 @@ func TestProxy(t *testing.T) {
 				Channel: room,
 				Text:    text,
 			}}),
-			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.Leave, result.Type)
+			Assert: func(expected bot.Message, result bot.Message) {
+				assert.Equal(bot.Leave, result.Type)
 				assert.Equal(expected.Text, result.Text)
 			},
 		},
@@ -64,8 +64,8 @@ func TestProxy(t *testing.T) {
 				Topic:   topic,
 				Text:    text,
 			}}),
-			Assert: func(expected gobot.Message, result gobot.Message) {
-				assert.Equal(gobot.Topic, result.Type)
+			Assert: func(expected bot.Message, result bot.Message) {
+				assert.Equal(bot.Topic, result.Type)
 				assert.Equal(expected.Topic, result.Topic)
 			},
 		},
@@ -77,11 +77,11 @@ func TestProxy(t *testing.T) {
 	}
 	for _, c := range proxyTestCases {
 		in := make(chan slack.RTMEvent, 2)
-		out := make(chan gobot.Message, 2)
+		out := make(chan bot.Message, 2)
 		go p.Forward(in, out)
 
 		in <- slack.RTMEvent{Type: "message", Data: &c.In}
-		c.Assert(gobot.Message{
+		c.Assert(bot.Message{
 			User:     "bob",
 			Room:     "general",
 			Text:     text,

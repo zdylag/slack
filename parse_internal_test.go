@@ -3,7 +3,7 @@ package slack
 import (
 	"testing"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,24 +11,24 @@ import (
 func TestParseRoom(t *testing.T) {
 	msg := slack.Message{Msg: slack.Msg{Channel: "C4321"}}
 	cases := []struct {
-		In  gobot.Message
-		Out gobot.Message
+		In  bot.Message
+		Out bot.Message
 	}{
 		{
-			In:  gobot.Message{Room: "C1234"},
-			Out: gobot.Message{Room: "C1234"},
+			In:  bot.Message{Room: "C1234"},
+			Out: bot.Message{Room: "C1234"},
 		},
 		{
-			In:  gobot.Message{Room: "D1234"},
-			Out: gobot.Message{Room: "D1234"},
+			In:  bot.Message{Room: "D1234"},
+			Out: bot.Message{Room: "D1234"},
 		},
 		{
-			In:  gobot.Message{Room: "", Envelope: msg},
-			Out: gobot.Message{Room: "C4321", Envelope: msg},
+			In:  bot.Message{Room: "", Envelope: msg},
+			Out: bot.Message{Room: "C4321", Envelope: msg},
 		},
 		{
-			In:  gobot.Message{Room: "general"},
-			Out: gobot.Message{Room: "C1234"},
+			In:  bot.Message{Room: "general"},
+			Out: bot.Message{Room: "C1234"},
 		},
 	}
 
@@ -43,20 +43,20 @@ func TestParseRoom(t *testing.T) {
 func TestParseUser(t *testing.T) {
 	msg := slack.Message{Msg: slack.Msg{User: "U4321"}}
 	cases := []struct {
-		In  gobot.Message
-		Out gobot.Message
+		In  bot.Message
+		Out bot.Message
 	}{
 		{
-			In:  gobot.Message{User: "U1234"},
-			Out: gobot.Message{User: "U1234"},
+			In:  bot.Message{User: "U1234"},
+			Out: bot.Message{User: "U1234"},
 		},
 		{
-			In:  gobot.Message{User: "", Envelope: msg},
-			Out: gobot.Message{User: "U4321", Envelope: msg},
+			In:  bot.Message{User: "", Envelope: msg},
+			Out: bot.Message{User: "U4321", Envelope: msg},
 		},
 		{
-			In:  gobot.Message{User: "bob"},
-			Out: gobot.Message{User: "U1234"},
+			In:  bot.Message{User: "bob"},
+			Out: bot.Message{User: "U1234"},
 		},
 	}
 
@@ -70,16 +70,16 @@ func TestParseUser(t *testing.T) {
 
 func TestParseDM(t *testing.T) {
 	cases := []struct {
-		In  gobot.Message
-		Out gobot.Message
+		In  bot.Message
+		Out bot.Message
 	}{
 		{
-			In:  gobot.Message{Room: "D1234"},
-			Out: gobot.Message{Room: "D1234"},
+			In:  bot.Message{Room: "D1234"},
+			Out: bot.Message{Room: "D1234"},
 		},
 		{
-			In:  gobot.Message{User: "U4321"},
-			Out: gobot.Message{User: "U4321", Room: "D1234"},
+			In:  bot.Message{User: "U4321"},
+			Out: bot.Message{User: "U4321", Room: "D1234"},
 		},
 	}
 

@@ -3,11 +3,11 @@ package slack
 import (
 	"errors"
 
-	"github.com/berfarah/gobot"
+	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
 )
 
-func (a *Adapter) parseRoom(m *gobot.Message) error {
+func (a *Adapter) parseRoom(m *bot.Message) error {
 	if len(m.Room) > 0 {
 		if m.Room[0] == 'C' || m.Room[0] == 'D' {
 			return nil
@@ -28,7 +28,7 @@ func (a *Adapter) parseRoom(m *gobot.Message) error {
 	return errors.New("Room not found")
 }
 
-func (a *Adapter) parseUser(m *gobot.Message) error {
+func (a *Adapter) parseUser(m *bot.Message) error {
 	if len(m.User) > 0 {
 		if m.User[0] == 'U' {
 			return nil
@@ -49,7 +49,7 @@ func (a *Adapter) parseUser(m *gobot.Message) error {
 	return errors.New("User not found")
 }
 
-func (a *Adapter) parseDM(m *gobot.Message) error {
+func (a *Adapter) parseDM(m *bot.Message) error {
 	if len(m.Room) > 0 {
 		if m.Room[0] == 'D' {
 			return nil
