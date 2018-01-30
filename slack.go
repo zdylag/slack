@@ -67,12 +67,8 @@ func (a *Adapter) Send(m gobot.Message) error {
 		return nil
 	}
 
-	if m.Room == "" {
-		if msg, ok := m.Envelope.(slack.Message); ok {
-			m.Room = msg.Channel
-		} else {
-			return errors.New("No Envelope provided")
-		}
+	if err := a.parseRoom(&m); err != nil {
+		return err
 	}
 
 	if m.Params == nil {
@@ -92,6 +88,28 @@ func (a *Adapter) Send(m gobot.Message) error {
 	return nil
 }
 
+// Direct does the same thing as send, but also ensures the message
+// is sent directly to the user
+func (a *Adapter) Direct(m gobot.Message) error {
+	if emptyMessage(m) {
+		return nil
+	}
+
+	if err := a.parseRoom(&m); err != nil {
+		return err
+	}
+
+	if err := a.parseUser(&m); err != nil {
+		return err
+	}
+
+	if err := a.parseDM(&m); err != nil {
+		return err
+	}
+
+	return a.Send(m)
+}
+
 // Reply does the same thing as send, but prefixes the message
 // with <@userID>, notifying the user of the message.
 func (a *Adapter) Reply(m gobot.Message) error {
@@ -99,14 +117,21 @@ func (a *Adapter) Reply(m gobot.Message) error {
 		return nil
 	}
 
-	msg, ok := m.Envelope.(slack.Message)
-	if !ok || msg.Channel == "" {
-		return errors.New("No Envelope provided")
+	if err := a.parseRoom(&m); err != nil {
+		return err
+	}
+
+	if err := a.parseUser(&m); err != nil {
+		return err
+	}
+
+	if m.Room == "" {
+		return errors.New("No room provided")
 	}
 
 	// No need to @ the user if it's a DM
-	if msg.Channel[0] != 'D' {
-		m.Text = "<@" + msg.User + ">" + m.Text
+	if m.Room[0] != 'D' {
+		m.Text = "<@" + m.User + ">" + m.Text
 	}
 
 	return a.Send(m)
@@ -116,22 +141,15 @@ func (a *Adapter) Reply(m gobot.Message) error {
 // the message.Room and falls back to message.Extra.Channel
 // to determine what channel's topic should be updated.
 func (a *Adapter) Topic(m gobot.Message) error {
-	var channelID string
+	if err := a.parseRoom(&m); err != nil {
+		return err
+	}
 
 	if m.Room == "" {
-		msg, ok := m.Envelope.(slack.Message)
-		if !ok {
-			return errors.New("No Channel provided")
-		}
-		channelID = msg.Channel
-	} else {
-		ch, ok := a.Store.ChannelByName(m.Room)
-		if !ok {
-			return errors.New("Channel not found")
-		}
-		channelID = ch.ID
+		return errors.New("No Channel provided")
 	}
-	_, err := a.Client.SetChannelTopic(channelID, m.Topic)
+
+	_, err := a.Client.SetChannelTopic(m.Room, m.Topic)
 
 	return err
 }

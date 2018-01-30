@@ -16,6 +16,10 @@ type Store interface {
 	ChannelByID(id string) (slack.Channel, bool)
 	// ChannelByName queries the store for a Channel by Name
 	ChannelByName(id string) (slack.Channel, bool)
+	// IMByID queries the store for a IM by ID
+	IMByID(id string) (slack.IM, bool)
+	// IMByUserID queries the store for a DM by User ID
+	IMByUserID(userID string) (slack.IM, bool)
 }
 
 type memoryStore struct {
@@ -23,6 +27,7 @@ type memoryStore struct {
 	indices  map[string]string
 	users    map[string]slack.User
 	channels map[string]slack.Channel
+	ims      map[string]slack.IM
 }
 
 func newMemoryStore(c *slack.Client) *memoryStore {
@@ -31,6 +36,7 @@ func newMemoryStore(c *slack.Client) *memoryStore {
 		indices:  make(map[string]string),
 		users:    make(map[string]slack.User),
 		channels: make(map[string]slack.Channel),
+		ims:      make(map[string]slack.IM),
 	}
 	return m
 }
@@ -44,6 +50,11 @@ func (s *memoryStore) Load(i *slack.Info) {
 	for _, ch := range i.Channels {
 		s.channels[ch.ID] = ch
 		s.indices["channel:name:"+ch.Name] = ch.ID
+	}
+
+	for _, im := range i.IMs {
+		s.ims[im.ID] = im
+		s.indices["im:userID:"+im.User] = im.ID
 	}
 }
 
@@ -76,4 +87,13 @@ func (s *memoryStore) ChannelByID(id string) (slack.Channel, bool) {
 
 func (s *memoryStore) ChannelByName(name string) (slack.Channel, bool) {
 	return s.ChannelByID(s.indices["channel:name:"+name])
+}
+
+func (s *memoryStore) IMByID(id string) (slack.IM, bool) {
+	dm, ok := s.ims[id]
+	return dm, ok
+}
+
+func (s *memoryStore) IMByUserID(userID string) (slack.IM, bool) {
+	return s.IMByID(s.indices["im:userID:"+userID])
 }
