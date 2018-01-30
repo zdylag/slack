@@ -23,6 +23,7 @@ func (a *Adapter) parseRoom(m *bot.Message) error {
 
 	if ch, ok := a.Store.ChannelByName(m.Room); ok {
 		m.Room = ch.ID
+		return nil
 	}
 
 	return errors.New("Room not found")
@@ -44,6 +45,7 @@ func (a *Adapter) parseUser(m *bot.Message) error {
 
 	if u, ok := a.Store.UserByName(m.User); ok {
 		m.User = u.ID
+		return nil
 	}
 
 	return errors.New("User not found")
@@ -61,11 +63,10 @@ func (a *Adapter) parseDM(m *bot.Message) error {
 		return nil
 	}
 
-	_, _, imID, err := a.Client.OpenIMChannel(m.User)
-	if err != nil {
-		return errors.New("Couldn't open IM to User: " + m.User)
+	if _, _, imID, err := a.Client.OpenIMChannel(m.User); err != nil {
+		m.Room = imID
+		return nil
 	}
-	m.Room = imID
 
-	return nil
+	return errors.New("Couldn't open IM to User: " + m.User)
 }
