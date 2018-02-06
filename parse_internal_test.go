@@ -32,7 +32,10 @@ func TestParseRoom(t *testing.T) {
 		},
 	}
 
-	a := Adapter{Store: testStore{}}
+	store := newTestStore()
+	store.Channel.ID = "C1234"
+	store.Channel.Name = "general"
+	a := Adapter{Store: store}
 
 	for _, c := range cases {
 		a.parseRoom(&c.In)
@@ -60,7 +63,9 @@ func TestParseUser(t *testing.T) {
 		},
 	}
 
-	a := Adapter{Store: testStore{}}
+	store := newTestStore()
+	store.User = slack.User{ID: "U1234", Name: "bob"}
+	a := Adapter{Store: store}
 
 	for _, c := range cases {
 		a.parseUser(&c.In)
@@ -83,7 +88,10 @@ func TestParseDM(t *testing.T) {
 		},
 	}
 
-	a := Adapter{Store: testStore{}}
+	store := newTestStore()
+	store.IM.ID = "D1234"
+	store.IM.User = "U4321"
+	a := Adapter{Store: store}
 
 	for _, c := range cases {
 		a.parseDM(&c.In)

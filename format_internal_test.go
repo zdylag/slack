@@ -92,7 +92,7 @@ var formatTestCases = []struct {
 		Should: "decode emails with labels",
 	},
 	{
-		In:     "foo <@U123|label> bar <#C123> <!channel> <https://www.example.com|example.com>",
+		In:     "foo <@U1234|label> bar <#C1234> <!channel> <https://www.example.com|example.com>",
 		Out:    "foo @label bar #general @channel example.com",
 		Should: "decode multiple links",
 	},
@@ -101,7 +101,13 @@ var formatTestCases = []struct {
 func TestFormatter(t *testing.T) {
 	assert := assert.New(t)
 
-	f := formatter{testStore{}}
+	store := newTestStore()
+	store.Channel.ID = "C1234"
+	store.Channel.Name = "general"
+	store.User = slack.User{ID: "U1234", Name: "bob"}
+	store.IM.ID = "D1234"
+	store.IM.User = "U1234"
+	f := formatter{store}
 
 	for _, c := range formatTestCases {
 		assert.Equal(c.Out, f.Format(&slack.MessageEvent{Msg: slack.Msg{Text: c.In}}), c.Should)

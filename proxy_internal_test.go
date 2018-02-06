@@ -71,9 +71,10 @@ func TestProxy(t *testing.T) {
 		},
 	}
 
+	store := newTestStore()
 	p := proxy{
 		Adapter:   New(""),
-		formatter: formatter{testStore{}},
+		formatter: formatter{store},
 	}
 	for _, c := range proxyTestCases {
 		in := make(chan slack.RTMEvent, 2)
