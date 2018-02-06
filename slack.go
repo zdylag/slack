@@ -58,6 +58,20 @@ func emptyMessage(m bot.Message) bool {
 	return m.Text == "" && m.Params == nil
 }
 
+func (a *Adapter) send(m bot.Message) error {
+	if m.Params == nil {
+		a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room)
+		return nil
+	}
+
+	if pm, ok := m.Params.(slack.PostMessageParameters); ok {
+		_, _, err := a.Client.PostMessage(m.Room, m.Text, pm)
+		return err
+	}
+
+	return nil
+}
+
 // Send send messages to Slack. If only text is provided, it uses
 // the already open RTM connection. If slack.PostMessageParamters
 // are provided in the message.Params field, it will send a web
@@ -67,25 +81,11 @@ func (a *Adapter) Send(m bot.Message) error {
 		return nil
 	}
 
-	if err := a.parseRoom(&m); err != nil {
+	if err := a.parse(&m, parseRoom, parseParams); err != nil {
 		return err
 	}
 
-	if m.Params == nil {
-		a.proxy.RTM.SendMessage(a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room))
-		return nil
-	}
-
-	if pm, ok := m.Params.(slack.PostMessageParameters); ok {
-		pm.AsUser = true
-		if pm.User == "" {
-			pm.User = a.ID
-		}
-		_, _, err := a.Client.PostMessage(m.Room, m.Text, pm)
-		return err
-	}
-
-	return nil
+	return a.send(m)
 }
 
 // Direct does the same thing as send, but also ensures the message
@@ -95,19 +95,17 @@ func (a *Adapter) Direct(m bot.Message) error {
 		return nil
 	}
 
-	if err := a.parseRoom(&m); err != nil {
+	if err := a.parse(
+		&m,
+		parseRoom,
+		parseUser,
+		parseDM,
+		parseParams,
+	); err != nil {
 		return err
 	}
 
-	if err := a.parseUser(&m); err != nil {
-		return err
-	}
-
-	if err := a.parseDM(&m); err != nil {
-		return err
-	}
-
-	return a.Send(m)
+	return a.send(m)
 }
 
 // Reply does the same thing as send, but prefixes the message
@@ -117,11 +115,12 @@ func (a *Adapter) Reply(m bot.Message) error {
 		return nil
 	}
 
-	if err := a.parseRoom(&m); err != nil {
-		return err
-	}
-
-	if err := a.parseUser(&m); err != nil {
+	if err := a.parse(
+		&m,
+		parseRoom,
+		parseUser,
+		parseParams,
+	); err != nil {
 		return err
 	}
 
@@ -134,14 +133,14 @@ func (a *Adapter) Reply(m bot.Message) error {
 		m.Text = "<@" + m.User + ">" + m.Text
 	}
 
-	return a.Send(m)
+	return a.send(m)
 }
 
 // Topic uses the web API to change the topic. It prefers
 // the message.Room and falls back to message.Extra.Channel
 // to determine what channel's topic should be updated.
 func (a *Adapter) Topic(m bot.Message) error {
-	if err := a.parseRoom(&m); err != nil {
+	if err := parseRoom(a, &m); err != nil {
 		return err
 	}
 
@@ -150,6 +149,5 @@ func (a *Adapter) Topic(m bot.Message) error {
 	}
 
 	_, err := a.Client.SetChannelTopic(m.Room, m.Topic)
-
 	return err
 }
