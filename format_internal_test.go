@@ -113,3 +113,19 @@ func TestFormatter(t *testing.T) {
 		assert.Equal(c.Out, f.Format(&slack.MessageEvent{Msg: slack.Msg{Text: c.In}}), c.Should)
 	}
 }
+
+func TestFormatter_fallback(t *testing.T) {
+	f := formatter{}
+	in := slack.Msg{
+		Text: "foo",
+		Attachments: []slack.Attachment{
+			{Fallback: "bar"},
+			{Fallback: "baz"},
+		},
+	}
+	assert.Equal(t,
+		f.Format(&slack.MessageEvent{Msg: in}),
+		"foo\nbar\nbaz",
+		"should flatten attachment fallback text",
+	)
+}
