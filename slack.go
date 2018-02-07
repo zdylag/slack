@@ -60,7 +60,7 @@ func emptyMessage(m bot.Message) bool {
 
 func (a *Adapter) send(m bot.Message) error {
 	if m.Params == nil {
-		a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room)
+		a.proxy.RTM.SendMessage(a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room))
 		return nil
 	}
 
