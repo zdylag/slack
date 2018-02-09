@@ -25,12 +25,9 @@ notifications:
   email: false
 
 before_script:
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
   # Download codeclimate binary
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
-  # Install gocov
-  - go get github.com/axw/gocov/gocov
   - ./cc-test-reporter before-build
 
 script: go test -v -race -coverprofile=c.out ./...
