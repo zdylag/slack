@@ -9,18 +9,7 @@ import (
 	slacker "github.com/nlopes/slack"
 )
 
-func Example_basic() {
-	robot := bot.New(
-		slack.New(os.Getenv("SLACK_TOKEN")),
-	)
-	robot.Hear(bot.Regexp("hi"), func(r bot.Responder) error {
-		r.Send(bot.Message{Text: "hi to you too, " + r.User})
-		return nil
-	})
-	robot.Run()
-}
-
-func Example_advanced() {
+func Example() {
 	robot := bot.New(
 		slack.New(os.Getenv("SLACK_TOKEN")),
 	)
@@ -79,7 +68,7 @@ func ExampleTopic() {
 	})
 }
 
-func Example_Store() {
+func ExampleStore() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	// The store is only populated if:
 	// 1. You call adapter.Messages(), which connects it to RTM
