@@ -40,7 +40,7 @@ func TestWebhook_response(t *testing.T) {
 		},
 	}
 
-	p := Plugin{Token: token}
+	p := Plugin{Token: token, registry: &registry{}}
 	for _, c := range cases {
 		recorder := httptest.NewRecorder()
 		p.webhook(recorder, &http.Request{Body: readCloser(c.In)})
@@ -58,7 +58,7 @@ func TestWebhook_callback(t *testing.T) {
 		[]byte(`{"callback_id":"bar", "token": "` + token + `"}`),
 	)}
 
-	p := Plugin{Token: token}
+	p := Plugin{Token: token, registry: &registry{}}
 	p.Add("bar", func(slack.AttachmentActionCallback) { done <- "bar" })
 	p.Add("foo", func(slack.AttachmentActionCallback) { done <- "foo" })
 

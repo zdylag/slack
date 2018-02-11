@@ -10,7 +10,7 @@ import (
 
 // Plugin conforms to the botopolis/bot.Plugin interface
 type Plugin struct {
-	registry
+	*registry
 	// Path at which our webhook sits
 	Path string
 	// Token to verify message comes from slack
@@ -20,8 +20,9 @@ type Plugin struct {
 // New returns a new plugin taking arguments for path and token
 func New(path, token string) *Plugin {
 	return &Plugin{
-		Path:  path,
-		Token: token,
+		registry: &registry{},
+		Path:     path,
+		Token:    token,
 	}
 }
 
