@@ -91,7 +91,7 @@ func parseParams(a *Adapter, m *bot.Message) error {
 
 	pm.AsUser = true
 	if pm.User == "" {
-		pm.User = a.ID
+		pm.User = a.BotID
 	}
 	m.Params = pm
 

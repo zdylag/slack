@@ -2,7 +2,6 @@ package slack
 
 import (
 	"errors"
-	"sync"
 
 	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
@@ -11,14 +10,17 @@ import (
 // Adapter is the bot slack adapter it implements
 // bot.Plugin and bot.Chat interfaces
 type Adapter struct {
-	mu    sync.Mutex
-	proxy *proxy
+	proxy interface {
+		Connect() chan bot.Message
+		Disconnect()
+		Send(bot.Message) error
+		SetTopic(room, topic string) error
+	}
 
 	Robot  *bot.Robot
 	Client *slack.Client
 	Store  Store
 
-	ID    string
 	BotID string
 	Name  string
 }
@@ -31,14 +33,6 @@ func New(secret string) *Adapter {
 		Store:  newMemoryStore(client),
 	}
 	a.proxy = newProxy(a)
-	a.proxy.OnConnect(func(ev *slack.ConnectedEvent) {
-		a.mu.Lock()
-		defer a.mu.Unlock()
-		a.Store.Load(ev.Info)
-		u := ev.Info.User
-		a.BotID = u.ID
-		a.Name = u.Name
-	})
 	return a
 }
 
@@ -58,20 +52,6 @@ func emptyMessage(m bot.Message) bool {
 	return m.Text == "" && m.Params == nil
 }
 
-func (a *Adapter) send(m bot.Message) error {
-	if m.Params == nil {
-		a.proxy.RTM.SendMessage(a.proxy.RTM.NewOutgoingMessage(m.Text, m.Room))
-		return nil
-	}
-
-	if pm, ok := m.Params.(slack.PostMessageParameters); ok {
-		_, _, err := a.Client.PostMessage(m.Room, m.Text, pm)
-		return err
-	}
-
-	return nil
-}
-
 // Send send messages to Slack. If only text is provided, it uses
 // the already open RTM connection. If slack.PostMessageParamters
 // are provided in the message.Params field, it will send a web
@@ -85,7 +65,7 @@ func (a *Adapter) Send(m bot.Message) error {
 		return err
 	}
 
-	return a.send(m)
+	return a.proxy.Send(m)
 }
 
 // Direct does the same thing as send, but also ensures the message
@@ -105,7 +85,7 @@ func (a *Adapter) Direct(m bot.Message) error {
 		return err
 	}
 
-	return a.send(m)
+	return a.proxy.Send(m)
 }
 
 // Reply does the same thing as send, but prefixes the message
@@ -130,10 +110,10 @@ func (a *Adapter) Reply(m bot.Message) error {
 
 	// No need to @ the user if it's a DM
 	if m.Room[0] != 'D' {
-		m.Text = "<@" + m.User + ">" + m.Text
+		m.Text = "<@" + m.User + "> " + m.Text
 	}
 
-	return a.send(m)
+	return a.proxy.Send(m)
 }
 
 // Topic uses the web API to change the topic. It prefers
@@ -148,6 +128,5 @@ func (a *Adapter) Topic(m bot.Message) error {
 		return errors.New("No Channel provided")
 	}
 
-	_, err := a.Client.SetChannelTopic(m.Room, m.Topic)
-	return err
+	return a.proxy.SetTopic(m.Room, m.Topic)
 }
