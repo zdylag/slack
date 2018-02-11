@@ -1,8 +1,11 @@
 package slack
 
 import (
+	"io/ioutil"
+
 	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
+	logging "github.com/op/go-logging"
 )
 
 type testProxy struct {
@@ -78,4 +81,12 @@ func (s *testStore) IMByUserID(id string) (slack.IM, bool) {
 		return s.IM, true
 	}
 	return s.IM, false
+}
+
+func nullLogger() *logging.Logger {
+	l := &logging.Logger{}
+	l.SetBackend(
+		logging.AddModuleLevel(logging.NewLogBackend(ioutil.Discard, "", 0)),
+	)
+	return l
 }
