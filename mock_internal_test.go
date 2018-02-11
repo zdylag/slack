@@ -1,8 +1,30 @@
 package slack
 
 import (
+	"io/ioutil"
+
+	"github.com/botopolis/bot"
 	"github.com/nlopes/slack"
+	logging "github.com/op/go-logging"
 )
+
+type testProxy struct {
+	C            chan bot.Message
+	SendFunc     func(bot.Message) error
+	SetTopicFunc func(room, topic string) error
+}
+
+func newTestProxy() *testProxy {
+	return &testProxy{
+		SendFunc:     func(bot.Message) error { return nil },
+		SetTopicFunc: func(string, string) error { return nil },
+	}
+}
+
+func (p *testProxy) Connect() chan bot.Message         { return p.C }
+func (p *testProxy) Disconnect()                       {}
+func (p *testProxy) Send(m bot.Message) error          { return p.SendFunc(m) }
+func (p *testProxy) SetTopic(room, topic string) error { return p.SetTopicFunc(room, topic) }
 
 type testStore struct {
 	LoadFunc   func(*slack.Info)
@@ -59,4 +81,12 @@ func (s *testStore) IMByUserID(id string) (slack.IM, bool) {
 		return s.IM, true
 	}
 	return s.IM, false
+}
+
+func nullLogger() *logging.Logger {
+	l := &logging.Logger{}
+	l.SetBackend(
+		logging.AddModuleLevel(logging.NewLogBackend(ioutil.Discard, "", 0)),
+	)
+	return l
 }

@@ -5,13 +5,10 @@ import (
 	"github.com/nlopes/slack"
 )
 
-var onConnectNoop = func(ev *slack.ConnectedEvent) {}
-
 type proxy struct {
 	*Adapter
 	RTM       *slack.RTM
 	formatter formatter
-	onConnect func(ev *slack.ConnectedEvent)
 }
 
 func newProxy(a *Adapter) *proxy {
@@ -19,11 +16,33 @@ func newProxy(a *Adapter) *proxy {
 		Adapter:   a,
 		RTM:       a.Client.NewRTM(),
 		formatter: formatter{a.Store},
-		onConnect: onConnectNoop,
 	}
 }
 
-func (p *proxy) OnConnect(f func(ev *slack.ConnectedEvent)) { p.onConnect = f }
+func (p *proxy) onConnect(ev *slack.ConnectedEvent) {
+	p.Store.Load(ev.Info)
+	p.BotID = ev.Info.User.ID
+	p.Name = ev.Info.User.Name
+}
+
+func (p *proxy) Send(m bot.Message) error {
+	if m.Params == nil {
+		p.RTM.SendMessage(p.RTM.NewOutgoingMessage(m.Text, m.Room))
+		return nil
+	}
+
+	if pm, ok := m.Params.(slack.PostMessageParameters); ok {
+		_, _, err := p.Client.PostMessage(m.Room, m.Text, pm)
+		return err
+	}
+
+	return nil
+}
+
+func (p *proxy) SetTopic(room, topic string) error {
+	_, err := p.Client.SetChannelTopic(room, topic)
+	return err
+}
 
 func (p *proxy) Connect() chan bot.Message {
 	go p.RTM.ManageConnection()

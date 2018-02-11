@@ -125,7 +125,7 @@ func TestParseParams(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		parseParams(&Adapter{ID: id}, &c.In)
+		parseParams(&Adapter{BotID: id}, &c.In)
 		assert.Equal(t, c.Out, c.In)
 	}
 }
@@ -147,7 +147,7 @@ func TestParseChain(t *testing.T) {
 	store := newTestStore()
 	store.IM.ID = "D1234"
 	store.IM.User = "U4321"
-	a := Adapter{ID: "B1234", Store: store}
+	a := Adapter{BotID: "B1234", Store: store}
 
 	a.parse(&in, parseDM, parseParams)
 	assert.Equal(t, out, in)

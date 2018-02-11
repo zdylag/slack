@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/botopolis/bot"
+	"github.com/botopolis/bot/mock"
 	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/assert"
 )
@@ -91,4 +92,44 @@ func TestProxy(t *testing.T) {
 		}, <-out)
 		close(in)
 	}
+}
+
+func TestProxyForward_connect(t *testing.T) {
+	var run bool
+	info := &slack.Info{User: &slack.UserDetails{ID: "B1234", Name: "beardroid"}}
+
+	store := newTestStore()
+	store.LoadFunc = func(i *slack.Info) {
+		assert.Equal(t, info, i)
+		run = true
+	}
+	p := proxy{Adapter: New("")}
+	p.Adapter.Store = store
+	p.Load(bot.New(mock.NewChat()))
+
+	ch := make(chan slack.RTMEvent, 2)
+	ch <- slack.RTMEvent{Data: &slack.ConnectedEvent{Info: info}}
+	close(ch)
+	p.Forward(ch, make(chan bot.Message))
+
+	assert.Equal(t, info.User.ID, p.Adapter.BotID)
+	assert.Equal(t, info.User.Name, p.Adapter.Username())
+	assert.True(t, run)
+}
+
+func TestProxyForward_invalidAuth(t *testing.T) {
+	done := make(chan bool)
+	p := proxy{Adapter: New("")}
+	p.Load(&bot.Robot{Logger: nullLogger()})
+
+	// Send the event, explicitly don't close the channel
+	ch := make(chan slack.RTMEvent, 2)
+	ch <- slack.RTMEvent{Data: &slack.InvalidAuthEvent{}}
+
+	go func() {
+		p.Forward(ch, make(chan bot.Message))
+		done <- true
+	}()
+
+	assert.True(t, <-done)
 }

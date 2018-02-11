@@ -1,6 +1,10 @@
 package slack
 
-import "github.com/nlopes/slack"
+import (
+	"sync"
+
+	"github.com/nlopes/slack"
+)
 
 // Store is the interface to expect from adapter.Store
 type Store interface {
@@ -23,6 +27,7 @@ type Store interface {
 }
 
 type memoryStore struct {
+	mu       sync.RWMutex
 	client   *slack.Client
 	indices  map[string]string
 	users    map[string]slack.User
@@ -42,6 +47,8 @@ func newMemoryStore(c *slack.Client) *memoryStore {
 }
 
 func (s *memoryStore) Load(i *slack.Info) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for _, u := range i.Users {
 		s.users[u.ID] = u
 		s.indices["user:name:"+u.Name] = u.ID
@@ -72,28 +79,40 @@ func (s *memoryStore) Update() (err error) {
 }
 
 func (s *memoryStore) UserByID(id string) (slack.User, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	u, ok := s.users[id]
 	return u, ok
 }
 
 func (s *memoryStore) UserByName(name string) (slack.User, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.UserByID(s.indices["user:name:"+name])
 }
 
 func (s *memoryStore) ChannelByID(id string) (slack.Channel, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	ch, ok := s.channels[id]
 	return ch, ok
 }
 
 func (s *memoryStore) ChannelByName(name string) (slack.Channel, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.ChannelByID(s.indices["channel:name:"+name])
 }
 
 func (s *memoryStore) IMByID(id string) (slack.IM, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	dm, ok := s.ims[id]
 	return dm, ok
 }
 
 func (s *memoryStore) IMByUserID(userID string) (slack.IM, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.IMByID(s.indices["im:userID:"+userID])
 }
