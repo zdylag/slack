@@ -6,22 +6,20 @@ import (
 	"github.com/nlopes/slack"
 )
 
-type callback func(slack.AttachmentActionCallback)
-
 type registry struct {
 	once      sync.Once
-	callbacks map[string]callback
+	callbacks map[string]func(slack.AttachmentActionCallback)
 	mu        sync.Mutex
 }
 
 func (r *registry) init() {
 	r.once.Do(func() {
-		r.callbacks = make(map[string]callback)
+		r.callbacks = make(map[string]func(slack.AttachmentActionCallback))
 	})
 }
 
 // Add registers a callback for the given callbackID
-func (r *registry) Add(callbackID string, fn callback) {
+func (r *registry) Add(callbackID string, fn func(slack.AttachmentActionCallback)) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.init()
