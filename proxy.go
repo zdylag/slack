@@ -21,6 +21,7 @@ func newProxy(a *Adapter) *proxy {
 
 func (p *proxy) onConnect(ev *slack.ConnectedEvent) {
 	p.Store.Load(ev.Info)
+	p.Store.Update()
 	p.BotID = ev.Info.User.ID
 	p.Name = ev.Info.User.Name
 }
