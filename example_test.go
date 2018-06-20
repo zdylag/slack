@@ -32,7 +32,6 @@ func ExampleSend_custom() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	adapter.Send(bot.Message{Params: slacker.PostMessageParameters{
 		Username: "ci",
-		Text:     "Failed!",
 		Attachments: []slacker.Attachment{
 			{
 				Color:     "danger",
