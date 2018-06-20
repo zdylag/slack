@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"fmt"
 	"errors"
 
 	"github.com/botopolis/bot"
@@ -75,12 +76,13 @@ func parseDM(a *Adapter, m *bot.Message) error {
 		return nil
 	}
 
-	if _, _, imID, err := a.Client.OpenIMChannel(m.User); err != nil {
-		m.Room = imID
-		return nil
+	_, _, imID, err := a.Client.OpenIMChannel(m.User)
+	if err != nil {
+		return fmt.Errorf("Couldn't open IM to User %s: %e", m.User, err)
 	}
 
-	return errors.New("Couldn't open IM to User: " + m.User)
+	m.Room = imID
+	return nil
 }
 
 func parseParams(a *Adapter, m *bot.Message) error {
