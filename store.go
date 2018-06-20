@@ -16,6 +16,8 @@ type Store interface {
 	UserByID(id string) (slack.User, bool)
 	// UserByName queries the store for a User by Name
 	UserByName(name string) (slack.User, bool)
+	// UserByEmail queries the store for a User by Name
+	UserByEmail(name string) (slack.User, bool)
 	// ChannelByID queries the store for a Channel by ID
 	ChannelByID(id string) (slack.Channel, bool)
 	// ChannelByName queries the store for a Channel by Name
@@ -52,6 +54,7 @@ func (s *memoryStore) Load(i *slack.Info) {
 	for _, u := range i.Users {
 		s.users[u.ID] = u
 		s.indices["user:name:"+u.Name] = u.ID
+		s.indices["user:email:"+u.Profile.Email] = u.ID
 	}
 
 	for _, ch := range i.Channels {
@@ -89,6 +92,12 @@ func (s *memoryStore) UserByName(name string) (slack.User, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.UserByID(s.indices["user:name:"+name])
+}
+
+func (s *memoryStore) UserByEmail(name string) (slack.User, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.UserByID(s.indices["user:email:"+name])
 }
 
 func (s *memoryStore) ChannelByID(id string) (slack.Channel, bool) {

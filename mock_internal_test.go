@@ -58,6 +58,12 @@ func (s *testStore) UserByName(name string) (slack.User, bool) {
 	}
 	return s.User, false
 }
+func (s *testStore) UserByEmail(email string) (slack.User, bool) {
+	if s.User.Profile.Email == email {
+		return s.User, true
+	}
+	return s.User, false
+}
 func (s *testStore) ChannelByID(id string) (slack.Channel, bool) {
 	if s.Channel.ID == id {
 		return s.Channel, true
