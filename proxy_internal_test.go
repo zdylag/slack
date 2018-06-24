@@ -120,7 +120,7 @@ func TestProxyForward_connect(t *testing.T) {
 func TestProxyForward_invalidAuth(t *testing.T) {
 	done := make(chan bool)
 	p := proxy{Adapter: New("")}
-	p.Load(&bot.Robot{Logger: nullLogger()})
+	p.Load(&bot.Robot{Logger: mock.NewLogger()})
 
 	// Send the event, explicitly don't close the channel
 	ch := make(chan slack.RTMEvent, 2)
