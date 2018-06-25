@@ -7,8 +7,8 @@
     ".",
     "mock"
   ]
-  revision = "2afbc53f6b8f3324cc5b8f37627a48e0db881ad3"
-  version = "v0.3.0"
+  revision = "42e18825ca2ba54b7618854ac6a1f84100bcb9f2"
+  version = "v0.4.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -34,12 +34,6 @@
   revision = "d86785d50d4be9c2e11cfbb0ed601f5dcb22899c"
 
 [[projects]]
-  name = "github.com/op/go-logging"
-  packages = ["."]
-  revision = "b2cb9fa56473e98db8caba80237377e83fe44db5"
-  version = "v1"
-
-[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -60,6 +54,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "379d34fd29265b2a2d3d1d585a6e42df6592901c40cec14092eb5853909906b3"
+  inputs-digest = "84eef14672425fa8ec1fc324e48d9cfc6f62df36aabf9203fe030861634041d8"
   solver-name = "gps-cdcl"
   solver-version = 1

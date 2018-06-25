@@ -21,7 +21,9 @@ func newProxy(a *Adapter) *proxy {
 
 func (p *proxy) onConnect(ev *slack.ConnectedEvent) {
 	p.Store.Load(ev.Info)
-	p.Store.Update()
+	if err := p.Store.Update(); err != nil {
+		p.Adapter.Robot.Logger.Error("slack:", err)
+	}
 	p.BotID = ev.Info.User.ID
 	p.Name = ev.Info.User.Name
 }
@@ -65,15 +67,15 @@ func (p *proxy) Forward(in <-chan slack.RTMEvent, out chan<- bot.Message) {
 		case *slack.HelloEvent:
 		case *slack.ConnectedEvent:
 			p.onConnect(ev)
-			p.Robot.Logger.Debugf("Connected as %s: %d", ev.Info.User.ID, ev.ConnectionCount)
+			p.Robot.Logger.Debugf("slack: Connected as %s: %d", ev.Info.User.ID, ev.ConnectionCount)
 		case *slack.MessageEvent:
 			out <- p.translate(ev)
 		case *slack.RTMError:
-			p.Robot.Logger.Errorf("RTM Error: %s", ev.Error())
+			p.Robot.Logger.Errorf("slack: RTM Error: %s", ev.Error())
 		case *slack.ConnectionErrorEvent:
-			p.Robot.Logger.Error("Slack: Connection Error")
+			p.Robot.Logger.Error("slack: Connection Error")
 		case *slack.InvalidAuthEvent:
-			p.Robot.Logger.Error("Slack: Invalid Credentials")
+			p.Robot.Logger.Error("slack: Invalid Credentials")
 			return
 		}
 	}
