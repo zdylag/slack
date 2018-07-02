@@ -21,6 +21,7 @@ type Adapter struct {
 		Connect() chan bot.Message
 		Disconnect()
 		Send(bot.Message) error
+		React(bot.Message) error
 		SetTopic(room, topic string) error
 	}
 
@@ -140,4 +141,13 @@ func (a *Adapter) Topic(m bot.Message) error {
 	}
 
 	return a.proxy.SetTopic(m.Room, m.Topic)
+}
+
+// React adds an emote to the last message sent (requires an Envelope to be set).
+// It relies on the timestamp and channel for a message to be present
+func (a *Adapter) React(m bot.Message) error {
+	if _, ok := m.Envelope.(slack.Message); !ok {
+		return errors.New("Empty envelope provided")
+	}
+	return a.proxy.React(m)
 }

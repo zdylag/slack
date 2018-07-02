@@ -69,6 +69,31 @@ func TestDirect_blank(t *testing.T) {
 	assert.Nil(t, adapter.Direct(bot.Message{}))
 }
 
+func TestReact(t *testing.T) {
+	proxy := newTestProxy()
+	adapter := Adapter{proxy: proxy}
+	cases := []struct {
+		Name string
+		In   interface{}
+		Err  bool
+	}{
+		{Name: "With no Envelope", In: nil, Err: true},
+		{Name: "With a mistyped Envelope", In: bot.Message{}, Err: true},
+		{Name: "With an Envelope", In: slack.Message{}, Err: false},
+	}
+
+	for _, c := range cases {
+		t.Run(c.Name, func(t *testing.T) {
+			err := adapter.React(bot.Message{Envelope: c.In})
+			if c.Err {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestDirect(t *testing.T) {
 	user := "U1234"
 	cases := []struct {

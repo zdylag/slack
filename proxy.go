@@ -42,6 +42,12 @@ func (p *proxy) Send(m bot.Message) error {
 	return nil
 }
 
+func (p *proxy) React(m bot.Message) error {
+	msg := m.Envelope.(slack.Message)
+	msgRef := slack.NewRefToMessage(msg.Channel, msg.Timestamp)
+	return p.RTM.AddReaction(m.Text, msgRef)
+}
+
 func (p *proxy) SetTopic(room, topic string) error {
 	_, err := p.Client.SetChannelTopic(room, topic)
 	return err
