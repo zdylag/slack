@@ -23,12 +23,12 @@ func Example() {
 	robot.Run()
 }
 
-func ExampleSend() {
+func ExampleAdapter_Send() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	adapter.Send(bot.Message{Text: "hello!"})
 }
 
-func ExampleSend_custom() {
+func ExampleAdapter_Send_custom() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	adapter.Send(bot.Message{Params: slacker.PostMessageParameters{
 		Username: "ci",
@@ -46,7 +46,7 @@ func ExampleSend_custom() {
 	}})
 }
 
-func ExampleReply() {
+func ExampleAdapter_Reply() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	fromMessage := bot.Message{
 		Text: "Hi bot! How are you?",
@@ -59,11 +59,24 @@ func ExampleReply() {
 	})
 }
 
-func ExampleTopic() {
+func ExampleAdapter_Topic() {
 	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
 	adapter.Topic(bot.Message{
 		Room:  "general",
 		Topic: "General conversation",
+	})
+}
+
+func ExampleAdapter_React() {
+	adapter := slack.New(os.Getenv("SLACK_TOKEN"))
+	fromMessage := slacker.Message{Msg: slacker.Msg{
+		Timestamp: "2020-01-03T18:23:14Z",
+		Channel:   "general",
+	}}
+	adapter.React(bot.Message{
+		Room:     "general",
+		Topic:    "General conversation",
+		Envelope: fromMessage,
 	})
 }
 
